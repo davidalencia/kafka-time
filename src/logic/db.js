@@ -11,7 +11,7 @@ import Database from "@tauri-apps/plugin-sql";
 //     command TEXT);
 //   CREATE TABLE projects (
 //     projectId INTEGER PRIMARY KEY AUTOINCREMENT,
-//     name TEXT,
+//     name TEXT
 //   );
 //   CREATE TABLE tasks (
 //     taskId INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,11 +22,13 @@ import Database from "@tauri-apps/plugin-sql";
 //   CREATE TABLE punchcards (
 //     punchcardId INTEGER PRIMARY KEY AUTOINCREMENT,
 //     taskId INTEGER,
+//     projectId INTEGER,
 //     appId INTEGER NOT NULL,
 //     start INTEGER NOT NULL,
 //     end INTEGER,
-//     FOREIGN KEY(appId) REFERENCES apps(appId)
-//     FOREIGN KEY(taskId) REFERENCES tasks(taskId)
+//     FOREIGN KEY(appId) REFERENCES apps(appId),
+//     FOREIGN KEY(taskId) REFERENCES tasks(taskId),
+//     FOREIGN KEY(projectId) REFERENCES projects(projectId)
 //   )
 // `);
 
@@ -55,7 +57,7 @@ export const punchard = (app) =>
       );
       if (res.length == 0) {
         res = await db.execute(
-          `INSERT into tasks (name) VALUES ("${app.title}")`
+          `INSERT into tasks (name) VALUES ("${app.title}");`
         );
         task = res.lastInsertId;
       } else {
@@ -72,19 +74,25 @@ export const punchard = (app) =>
       await db.execute(
         `UPDATE punchcards
             SET end = ${ctime}
-            WHERE punchcardId = ${res[0].punchcardId}
+            WHERE punchcardId = ${res[0].punchcardId};
         `
       );
     else
       await db.execute(`INSERT into
         punchcards (appId, taskId, start, end)
-        VALUES (${appId}, ${task}, ${ctime}, ${ctime + 10})`);
+        VALUES (${appId}, ${task}, ${ctime}, ${ctime + 10});`);
   });
 
 export const getPunchcards = (app) =>
   db.then(async (db) => {
     return await db.select(
-      `SELECT * FROM punchcards ORDER BY punchcardId DESC;`
+      `SELECT p.punchcardId, p.start, p.end, a.name AS app, t.name AS title, r.name AS project
+        FROM punchcards p
+        JOIN tasks t ON p.taskId = t.taskId
+        JOIN apps a ON p.appId = a.appId
+        LEFT OUTER JOIN projects r ON p.projectId = r.projectId
+        ORDER BY punchcardId ASC;
+        `
     );
   });
 
@@ -97,5 +105,27 @@ export const timeSpent = (app) =>
         WHERE a.appId=p.appId
         GROUP BY a.appId
         ORDER BY time DESC;`
+    );
+  });
+
+export const project = ({ name }) =>
+  db.then(async (db) => {
+    let res = await db.select(`SELECT * FROM projects WHERE name = "${name}";`);
+    if (res.length > 0) throw Error("project already exists");
+    return await db.execute(`INSERT into projects (name) VALUES ("${name}");`);
+  });
+
+export const getProjects = () =>
+  db.then(async (db) => {
+    return db.select(`SELECT * FROM projects;`);
+  });
+
+export const addProject2Punchcards = (projectId, punchcardIds) =>
+  db.then(async (db) => {
+    return db.execute(
+      `UPDATE punchcards
+            SET projectId = ${projectId}
+            WHERE taskId IN (${punchcardIds});
+        `
     );
   });
