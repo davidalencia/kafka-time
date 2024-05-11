@@ -34,6 +34,8 @@ import Database from "@tauri-apps/plugin-sql";
 
 const db = Database.load("sqlite:test.db");
 
+const todayEpoch = () => Math.round(new Date().getTime() / 1000);
+
 export const punchard = (app) =>
   db.then(async (db) => {
     let res, appId;
@@ -96,14 +98,36 @@ export const getPunchcards = (app) =>
     );
   });
 
-export const timeSpent = (app) =>
+export const timeSpent = (
+  after = todayEpoch() - 60 * 60 * 24,
+  before = todayEpoch()
+) =>
   db.then(async (db) => {
     return await db.select(
       `SELECT 
         SUM(p.end - p.start) AS time, a.name 
         FROM punchcards p, apps a
         WHERE a.appId=p.appId
+        AND p.start > ${after}
+        AND p.start < ${before}
         GROUP BY a.appId
+        ORDER BY time DESC;`
+    );
+  });
+
+export const timeByProjects = (
+  after = todayEpoch() - 60 * 60 * 24,
+  before = todayEpoch()
+) =>
+  db.then(async (db) => {
+    return await db.select(
+      `SELECT 
+        SUM(p.end - p.start) AS time, r.name 
+        FROM punchcards p, projects r
+        WHERE r.projectId=p.projectId
+        AND p.start > ${after}
+        AND p.start < ${before}
+        GROUP BY r.projectId
         ORDER BY time DESC;`
     );
   });

@@ -58,9 +58,9 @@ async function reset() {
     <!-- <h1>Welcome to Kafka time!</h1>
     <Greet /> -->
     <!-- <Button>hola</Button> -->
-    <nav>
-      <RouterLink to="/">Go to Home</RouterLink>
-      <RouterLink to="/calendar">calendar</RouterLink>
+    <nav class="flex flex-row m-4 gap-2">
+      <Button @click="$router.push('/calendar')">Calendar</Button>
+      <Button @click="$router.push('/')">Projects</Button>
     </nav>
   </div>
   <RouterView />

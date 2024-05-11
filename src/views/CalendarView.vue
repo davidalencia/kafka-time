@@ -8,22 +8,14 @@ import dbscan from '@cdxoo/dbscan';
 
 
 import ScrollPanel from 'primevue/scrollpanel';
-import ContextMenu from 'primevue/contextmenu';
-import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
-import Dropdown from 'primevue/dropdown'
 import Button from "primevue/button"
 import RadioButton from "primevue/radiobutton"
-import Panel from "primevue/panel"
 
 
 const events = ref([])
-// const data = ref([])
-// const menu = ref()
 const projectRadio = ref(null)
 const projectInput = ref("")
-// const canSaveProject = ref(false)
-// const punchcardIdClick = ref()
 const projects = ref([])
 
 
@@ -82,7 +74,8 @@ onMounted(async () => {
             id: card.punchcardId,
             ids: [card.punchcardId],
             isEditable: false,
-            // isCustom: true,
+            project: card.project,
+            isCustom: true,
             description: card.title
         })
     }
@@ -113,12 +106,11 @@ const saveProject = async (task) => {
 
 </script>
 <template>
-    <div class="card">
-        {{ canSaveProject }}
+    <ScrollPanel class="card h-[32rem]">
         <Qalendar :events="events" :config="{ eventDialog: { isCustom: true } }">
             <template #weekDayEvent="eventProps">
                 <div
-                    :style="{ backgroundColor: 'cornflowerblue', color: '#fff', width: '100%', height: '100%', overflow: 'hidden' }">
+                    :style="{ backgroundColor: !!eventProps.eventData.project ? 'cornflowerblue' : 'green', color: '#fff', width: '100%', height: '100%', overflow: 'hidden' }">
                     <span class="text-xs">{{ eventProps.eventData.project || eventProps.eventData.title }}</span>
 
                 </div>
@@ -134,7 +126,6 @@ const saveProject = async (task) => {
                     <hr />
                     <ScrollPanel style="width: 100%; height: 100px">
                         <div class="m-0" v-html="props.eventDialogData.description">
-
                         </div>
                     </ScrollPanel>
                     <hr />
@@ -164,7 +155,7 @@ const saveProject = async (task) => {
             </template>
 
         </Qalendar>
-    </div>
+    </ScrollPanel>
 </template>
 <style>
 @import "qalendar/dist/style.css";
