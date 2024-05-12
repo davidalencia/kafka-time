@@ -43,10 +43,10 @@ fn parsable(a: ActiveWindow)-> ParsableWindow{
 
 
 // [~] https://tauri.app/v1/guides/features/system-tray/
-// [ ] Crear proyecto
-// [ ] agregar task a proyecto
-// [ ] filtrar por fecha
-// [ ] filtrar por proyecto
+// [x] Crear proyecto
+// [x] agregar task a proyecto
+// [x] filtrar por fecha
+// [x] filtrar por proyecto
 
 #[tauri::command]
 fn current_app() -> Result<ParsableWindow, ()> {

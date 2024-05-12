@@ -45,13 +45,11 @@ onMounted(async () => {
         distanceFunction: (a, b) => Math.abs(a.end - b.start)
     });
 
-    console.log(cards.at(-1))
     let clusters = []
     for (let cl of scan.clusters) {
         let clCards = cards.slice(cl[0], cl.at(-1))
         let card = cards[cl[0]]
         let cardEnd = cards[cl.at(-1)]
-        console.log(card)
         clusters.push({
             title: Array.from(new Set(clCards.map(x => x.app))).join(", "),
             time: { start: formatDate(card.start), end: formatDate(cardEnd.end) },
